@@ -1,4 +1,4 @@
-import { Euler, LinearFilter, MathUtils, Quaternion, Texture, Vector3 } from 'three';
+import { Euler, LinearFilter, MathUtils, Quaternion, RepeatWrapping, Texture, Vector3 } from 'three';
 import { ExtendedPosition, Point, ResolvableBoolean } from '../model';
 import { PSVError } from '../PSVError';
 import { wrap } from './math';
@@ -320,6 +320,8 @@ export function createTexture(img: HTMLImageElement | HTMLCanvasElement): Textur
     texture.needsUpdate = true;
     texture.minFilter = LinearFilter;
     texture.generateMipmaps = false;
+    texture.wrapS = RepeatWrapping;
+    texture.repeat.x = -1;
     return texture;
 }
 
