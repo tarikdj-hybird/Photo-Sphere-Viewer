@@ -211,7 +211,7 @@ export class EquirectangularAdapter extends AbstractAdapter<string, Texture> {
             this.SPHERE_SEGMENTS,
             this.SPHERE_HORIZONTAL_SEGMENTS,
             -Math.PI / 2
-        ).scale(-1, 1, 1) as SphereGeometry;
+        ).scale(1, 1, 1) as SphereGeometry;
 
         const material = AbstractAdapter.createOverlayMaterial();
 

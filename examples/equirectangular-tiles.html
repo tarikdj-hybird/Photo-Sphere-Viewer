@@ -25,81 +25,108 @@
                     options: {
                         yaw: 0,
                         pitch: 0,
-                        zoom: 50,
+                        zoom: 2,
                         caption: 'Parc national du Mercantour <b>&copy; Damien Sorel</b>',
                     },
                     config: {
-                        width: 6656,
-                        cols: 16,
-                        rows: 8,
-                        baseUrl: `${baseUrl}sphere-small.jpg`,
-                        tileUrl: (col, row) => {
-                            if (row === 0 || row === 7) {
-                                return null; // the tile won't be loaded
-                            }
-                            if (col === 8 && row === 4) {
-                                return 'error.jpg';
-                            }
-                            const num = row * 16 + col + 1;
-                            return `${baseUrl}sphere-tiles/image_part_${('000' + num).slice(-3)}.jpg`;
-                        },
-                    },
-                },
-                {
-                    minFov: 10,
-                    options: {
-                        yaw: '52deg',
-                        pitch: 0,
-                        zoom: 20,
-                        caption: "Simon's Town <b>&copy;  Greg Zall (HDRI Haven)</b>",
-                    },
-                    config: {
-                        baseUrl: `${baseUrl}sphere-tiles-24k/base.jpg`,
+                        width: 8192,
+                        cols: 8,
+                        rows: 4,
                         levels: [
                             {
-                                width: 6144,
-                                cols: 16,
-                                rows: 8,
-                                zoomRange: [0, 30],
+                                width: 4096, // 128
+                                cols: 8,
+                                rows: 4,
+                                zoomRange: [0, 1],
                             },
                             {
-                                width: 12288,
-                                cols: 32,
-                                rows: 16,
+                                width: 8192, // 256
+                                cols: 8,
+                                rows: 4,
+                                zoomRange: [1, 30],
+                            },
+                            {
+                                width: 16384, // 512
+                                cols: 8,
+                                rows: 4,
                                 zoomRange: [30, 70],
                             },
                             {
-                                width: 24576,
-                                cols: 64,
-                                rows: 32,
+                                width: 32768, // 1024
+                                cols: 8,
+                                rows: 4,
                                 zoomRange: [70, 100],
                             },
                         ],
                         tileUrl: (col, row, level) => {
-                            // skip top and bottom tiles on higher resolutions
-                            if (level === 1 && (row <= 4 || row >= 14)
-                                || level === 2 && (row <= 13 || row >= 29)) {
-                                return null;
-                            }
-                            if (level === 0 && col === 11 && row === 4
-                                || level === 1 && col === 22 && row === 8
-                                || level === 2 && col === 44 && row === 16
-                            ) {
-                                return 'error.jpg';
-                            }
-                            return `${baseUrl}sphere-tiles-24k/tile_${level}_${col}_${row}.jpg`;
+                            const imageNum = 0;
+                            const num = row * 8 + (7 - col);
+
+                            return `http://127.0.0.1:8080/assets/tiles/r${level}/0/${String(imageNum).padStart(
+                                5,
+                                '0'
+                            )}-pano-tex-r${level}-${String(num).padStart(2, '0')}.jpg`;
                         },
                     },
                 },
+                // {
+                //     minFov: 10,
+                //     options: {
+                //         yaw: '52deg',
+                //         pitch: 0,
+                //         zoom: 20,
+                //         caption: "Simon's Town <b>&copy;  Greg Zall (HDRI Haven)</b>",
+                //     },
+                //     config: {
+                //         baseUrl: `${baseUrl}sphere-tiles-24k/base.jpg`,
+                //         levels: [
+                //             {
+                //                 width: 6144,
+                //                 cols: 16,
+                //                 rows: 8,
+                //                 zoomRange: [0, 30],
+                //             },
+                //             {
+                //                 width: 12288,
+                //                 cols: 32,
+                //                 rows: 16,
+                //                 zoomRange: [30, 70],
+                //             },
+                //             {
+                //                 width: 24576,
+                //                 cols: 64,
+                //                 rows: 32,
+                //                 zoomRange: [70, 100],
+                //             },
+                //         ],
+                //         tileUrl: (col, row, level) => {
+                //             // skip top and bottom tiles on higher resolutions
+                //             if (level === 1 && (row <= 4 || row >= 14)
+                //                 || level === 2 && (row <= 13 || row >= 29)) {
+                //                 return null;
+                //             }
+                //             if (level === 0 && col === 11 && row === 4
+                //                 || level === 1 && col === 22 && row === 8
+                //                 || level === 2 && col === 44 && row === 16
+                //             ) {
+                //                 return 'error.jpg';
+                //             }
+                //             return `${baseUrl}sphere-tiles-24k/tile_${level}_${col}_${row}.jpg`;
+                //         },
+                //     },
+                // },
             ];
 
             const viewer = new PhotoSphereViewer.Viewer({
                 container: 'photosphere',
-                adapter: [PhotoSphereViewer.EquirectangularTilesAdapter, {
-                    showErrorTile: true,
-                    baseBlur: true,
-                    // debug: true,
-                }],
+                adapter: [
+                    PhotoSphereViewer.EquirectangularTilesAdapter,
+                    {
+                        showErrorTile: true,
+                        baseBlur: true,
+                        // debug: true,
+                    },
+                ],
                 plugins: [PhotoSphereViewer.GyroscopePlugin],
                 loadingImg: baseUrl + 'loader.gif',
                 navbar: [

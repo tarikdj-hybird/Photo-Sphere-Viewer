@@ -1,6 +1,7 @@
 import type { TextureData, Viewer } from '@photo-sphere-viewer/core';
 import { AbstractAdapter, CONSTANTS, EquirectangularAdapter, events, PSVError, utils } from '@photo-sphere-viewer/core';
 import {
+    BackSide,
     BufferAttribute,
     Frustum,
     ImageLoader,
@@ -239,7 +240,7 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
             this.SPHERE_HORIZONTAL_SEGMENTS,
             -Math.PI / 2
         )
-            .scale(-1, 1, 1)
+            .scale(1, 1, 1)
             .toNonIndexed() as SphereGeometry;
 
         geometry.clearGroups();
@@ -294,9 +295,9 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
     private __setTexture(mesh: EquirectangularMesh, texture: Texture) {
         let material;
         if (texture) {
-            material = new MeshBasicMaterial({ map: texture });
+            material = new MeshBasicMaterial({ map: texture, side: BackSide });
         } else {
-            material = new MeshBasicMaterial({ opacity: 0, transparent: true });
+            material = new MeshBasicMaterial({ opacity: 0, side: BackSide, transparent: true });
         }
 
         for (let i = 0; i < this.NB_GROUPS; i++) {
@@ -433,7 +434,7 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
                         image = buildDebugTexture(image, tile.config.level, tileId(tile)) as any;
                     }
 
-                    const material = new MeshBasicMaterial({ map: utils.createTexture(image) });
+                    const material = new MeshBasicMaterial({ map: utils.createTexture(image), side: BackSide });
                     this.__swapMaterial(tile, material, false);
                     this.viewer.needsUpdate();
                 }
