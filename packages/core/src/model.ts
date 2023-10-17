@@ -357,7 +357,6 @@ export type ParsedViewerConfig = Omit<
     | 'defaultPitch'
     | 'fisheye'
     | 'requestHeaders'
-    | 'navbar'
     | 'keyboard'
 > & {
     adapter?: [AdapterConstructor, any];
@@ -366,7 +365,6 @@ export type ParsedViewerConfig = Omit<
     defaultPitch?: number;
     fisheye?: number;
     requestHeaders?: (url: string) => Record<string, string>;
-    navbar?: Array<string | NavbarCustomButton>;
     keyboard?: false | 'always' | 'fullscreen';
 };
 

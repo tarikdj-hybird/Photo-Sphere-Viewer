@@ -14,7 +14,6 @@
         <script src="/node_modules/three/build/three.js"></script>
         <script src="/dist/core/index.js"></script>
         <script src="/dist/equirectangular-tiles-adapter/index.js"></script>
-        <script src="/dist/gyroscope-plugin/index.js"></script>
 
         <script>
             const baseUrl = 'https://photo-sphere-viewer-data.netlify.app/assets/';
@@ -127,7 +126,6 @@
                         // debug: true,
                     },
                 ],
-                plugins: [PhotoSphereViewer.GyroscopePlugin],
                 loadingImg: baseUrl + 'loader.gif',
                 navbar: [
                     'zoom',
@@ -146,7 +144,6 @@
                         })(),
                     },
                     'caption',
-                    'gyroscope',
                     'fullscreen',
                 ],
             });

@@ -85,8 +85,6 @@ module.exports = {
                                 'adapters/equirectangular-video',
                                 'adapters/cubemap',
                                 'adapters/cubemap-tiles',
-                                'adapters/cubemap-video',
-                                'adapters/little-planet',
                             ],
                         },
                         {
@@ -115,8 +113,9 @@ module.exports = {
                 {
                     title: 'Official plugins',
                     collapsable: false,
-                    children: getFiles('docs/plugins')
-                        .filter((f) => f !== 'README.md' && f !== 'writing-a-plugin.md' && f !== 'third-party.md'),
+                    children: getFiles('docs/plugins').filter(
+                        (f) => f !== 'README.md' && f !== 'writing-a-plugin.md' && f !== 'third-party.md'
+                    ),
                 },
                 'third-party',
             ],

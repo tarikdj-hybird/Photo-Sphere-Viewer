@@ -15,7 +15,6 @@
         <script src="/dist/core/index.js"></script>
         <script src="/dist/cubemap-adapter/index.js"></script>
         <script src="/dist/cubemap-tiles-adapter/index.js"></script>
-        <script src="/dist/gyroscope-plugin/index.js"></script>
 
         <script>
             const baseUrl = 'https://photo-sphere-viewer-data.netlify.app/assets/';
@@ -83,8 +82,7 @@
                         },
                         tileUrl: (face, col, row, level) => {
                             // skip sky tiles on higher resolution
-                            if (face === 'top' && level === 1
-                                || face !== 'bottom' && row <= 2 && level === 1) {
+                            if ((face === 'top' && level === 1) || (face !== 'bottom' && row <= 2 && level === 1)) {
                                 return null;
                             }
                             return `${baseUrl}cubemap-tiles-24k/${face}_${level}_${col}_${row}.jpg`;
@@ -95,12 +93,14 @@
 
             const viewer = new PhotoSphereViewer.Viewer({
                 container: 'photosphere',
-                adapter: [PhotoSphereViewer.CubemapTilesAdapter, {
-                    showErrorTile: true,
-                    baseBlur: true,
-                    // debug: true,
-                }],
-                plugins: [PhotoSphereViewer.GyroscopePlugin],
+                adapter: [
+                    PhotoSphereViewer.CubemapTilesAdapter,
+                    {
+                        showErrorTile: true,
+                        baseBlur: true,
+                        // debug: true,
+                    },
+                ],
                 loadingImg: baseUrl + 'loader.gif',
                 navbar: [
                     'zoom',
@@ -119,7 +119,6 @@
                         })(),
                     },
                     'caption',
-                    'gyroscope',
                     'fullscreen',
                 ],
             });

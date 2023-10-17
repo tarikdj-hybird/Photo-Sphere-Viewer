@@ -1,13 +1,6 @@
 import type { AbstractAdapter } from './adapters/AbstractAdapter';
-import type { AbstractComponent } from './components/AbstractComponent';
-import { Loader } from './components/Loader';
-import { Navbar } from './components/Navbar';
-import { Notification } from './components/Notification';
-import { Overlay } from './components/Overlay';
-import { Panel } from './components/Panel';
-import { Tooltip, TooltipConfig } from './components/Tooltip';
 import { CONFIG_PARSERS, DEFAULTS, getViewerConfig, READONLY_OPTIONS } from './data/config';
-import { ANIMATION_MIN_DURATION, DEFAULT_TRANSITION, IDS, VIEWER_DATA } from './data/constants';
+import { ANIMATION_MIN_DURATION, DEFAULT_TRANSITION, VIEWER_DATA } from './data/constants';
 import { SYSTEM } from './data/system';
 import {
     BeforeAnimateEvent,
@@ -20,7 +13,6 @@ import {
     ViewerEvents,
     ZoomUpdatedEvent,
 } from './events';
-import errorIcon from './icons/error.svg';
 import { TypedEventTarget } from './lib/TypedEventTarget';
 import {
     AnimateOptions,
@@ -55,7 +47,6 @@ import {
     logWarn,
     requestFullscreen,
     resolveBoolean,
-    throttle,
     toggleClass,
 } from './utils';
 import { Group, PerspectiveCamera } from 'three';
@@ -85,17 +76,6 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
     readonly eventsHandler: EventsHandler;
     readonly dataHelper: DataHelper;
 
-    readonly loader: Loader;
-    readonly navbar: Navbar;
-    readonly notification: Notification;
-    readonly overlay: Overlay;
-    readonly panel: Panel;
-
-    /** @internal */
-    readonly children: AbstractComponent[] = [];
-
-    private readonly onResize = throttle(() => this.navbar.autoSize(), 500);
-
     constructor(config: ViewerConfig) {
         super();
 
@@ -123,12 +103,6 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
         this.dataHelper = new DataHelper(this);
         this.dynamics = new ViewerDynamics(this);
 
-        this.loader = new Loader(this);
-        this.navbar = new Navbar(this);
-        this.panel = new Panel(this);
-        this.notification = new Notification(this);
-        this.overlay = new Overlay(this);
-
         // init
         this.resize(this.config.size);
 
@@ -145,16 +119,11 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
             plugin.init?.();
         }
 
-        // init buttons
-        if (this.config.navbar) {
-            this.navbar.setButtons(this.config.navbar);
-        }
-
         // load panorama
         if (this.config.panorama) {
             this.setPanorama(this.config.panorama);
         } else {
-            this.loader.show();
+            // this.loader.show();
         }
     }
 
@@ -171,9 +140,6 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
             delete this.plugins[id];
         }
 
-        this.children.slice().forEach((child) => child.destroy());
-        this.children.length = 0;
-
         this.eventsHandler.destroy();
         this.renderer.destroy();
         this.textureLoader.destroy();
@@ -189,11 +155,6 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
     private init() {
         this.eventsHandler.init();
         this.renderer.init();
-
-        if (this.config.navbar) {
-            this.container.classList.add('psv--has-navbar');
-            this.navbar.show();
-        }
 
         if (this.config.keyboard === 'always') {
             this.startKeyboardControl();
@@ -291,7 +252,6 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
             this.state.hFov = this.dataHelper.vFovToHFov(this.state.vFov);
 
             this.dispatchEvent(new SizeUpdatedEvent(this.getSize()));
-            this.onResize();
         }
     }
 
@@ -347,27 +307,23 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
         this.config.description = options.description;
 
         const done = (err?: Error) => {
-            this.loader.hide();
+            // this.loader.hide();
 
             this.state.loadingPromise = null;
 
             if (isAbortError(err)) {
                 return false;
             } else if (err) {
-                this.navbar.setCaption('');
                 this.showError(this.config.lang.loadError);
                 console.error(err);
                 throw err;
             } else {
-                this.setOverlay(options.overlay, options.overlayOpacity);
-                this.navbar.setCaption(this.config.caption);
                 return true;
             }
         };
 
-        this.navbar.setCaption(`<em>${this.config.loadingTxt || ''}</em>`);
         if (options.showLoader || !this.state.ready) {
-            this.loader.show();
+            // this.loader.show();
         }
 
         const loadingPromise = this.adapter.loadTexture(this.config.panorama, options.panoData).then((textureData) => {
@@ -407,7 +363,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
         } else {
             this.state.loadingPromise = loadingPromise
                 .then((textureData) => {
-                    this.loader.hide();
+                    // this.loader.hide();
 
                     this.dispatchEvent(new PanoramaLoadedEvent(textureData));
 
@@ -503,7 +459,6 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
 
             switch (key) {
                 case 'caption':
-                    this.navbar.setCaption(this.config.caption);
                     break;
 
                 case 'size':
@@ -514,9 +469,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
                     this.renderer.setSphereCorrection(this.config.sphereCorrection);
                     break;
 
-                case 'navbar':
                 case 'lang':
-                    this.navbar.setButtons(this.config.navbar);
                     break;
 
                 case 'moveSpeed':
@@ -560,19 +513,14 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
      * Displays an error message over the viewer
      */
     showError(message: string) {
-        this.overlay.show({
-            id: IDS.ERROR,
-            image: errorIcon,
-            title: message,
-            dissmisable: false,
-        });
+        // show error
     }
 
     /**
      *  Hides the error message
      */
     hideError() {
-        this.overlay.hide(IDS.ERROR);
+        // hide error
     }
 
     /**
@@ -772,15 +720,6 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
      */
     stopKeyboardControl() {
         this.state.keyboardEnabled = false;
-    }
-
-    /**
-     * Creates a new tooltip
-     * @description Use {@link Tooltip.move} to update the tooltip without re-create
-     * @throws {@link PSVError} if the configuration is invalid
-     */
-    createTooltip(config: TooltipConfig): Tooltip {
-        return new Tooltip(this, config);
     }
 
     /**
