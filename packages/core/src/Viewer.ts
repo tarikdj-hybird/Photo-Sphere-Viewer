@@ -49,7 +49,7 @@ import {
     resolveBoolean,
     toggleClass,
 } from './utils';
-import { Group, PerspectiveCamera } from 'three';
+import { Group, PerspectiveCamera, Scene } from 'three';
 
 /**
  * Photo Sphere Viewer controller
@@ -62,6 +62,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
     readonly container: HTMLElement;
     readonly camera: PerspectiveCamera;
     readonly meshContainer: Group;
+    readonly scene: Scene;
 
     /** @internal */
     readonly adapter: AbstractAdapter<any, any>;
@@ -93,6 +94,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
         // this.parent.appendChild(this.container);
         this.camera = config.camera;
         this.meshContainer = config.meshContainer;
+        this.scene = config.scene;
 
         // @ts-ignore
         this.adapter = new this.config.adapter[0](this, this.config.adapter[1]);
@@ -314,7 +316,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
             if (isAbortError(err)) {
                 return false;
             } else if (err) {
-                this.showError(this.config.lang.loadError);
+                // this.showError(this.config.lang.loadError);
                 console.error(err);
                 throw err;
             } else {
@@ -512,7 +514,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
     /**
      * Displays an error message over the viewer
      */
-    showError(message: string) {
+    showError() {
         // show error
     }
 
