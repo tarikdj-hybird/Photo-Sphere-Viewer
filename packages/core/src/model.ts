@@ -1,4 +1,4 @@
-import { Group, Object3D, PerspectiveCamera, Scene, Texture, WebGLRenderer } from 'three';
+import { Group, Object3D, PerspectiveCamera, Scene, Texture } from 'three';
 import { AdapterConstructor } from './adapters/AbstractAdapter';
 import { ACTIONS } from './data/constants';
 import { PluginConstructor } from './plugins/AbstractPlugin';
