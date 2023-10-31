@@ -49,7 +49,7 @@ import {
     resolveBoolean,
     toggleClass,
 } from './utils';
-import { Group, PerspectiveCamera, Scene } from 'three';
+import { Group, MathUtils, PerspectiveCamera, Scene } from 'three';
 
 /**
  * Photo Sphere Viewer controller
@@ -216,7 +216,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
      * Returns the current zoom level
      */
     getZoomLevel(): number {
-        return this.dynamics.zoom.current;
+        return MathUtils.clamp(this.config.maxFov - this.camera.fov, 0, 100);
     }
 
     /**
