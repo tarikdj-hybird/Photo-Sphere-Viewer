@@ -1,8 +1,9 @@
 import type { TextureData, Viewer } from '@photo-sphere-viewer/core';
 import { AbstractAdapter, CONSTANTS, EquirectangularAdapter, events, PSVError, utils } from '@photo-sphere-viewer/core';
+import { SPHERE_RADIUS } from '@photo-sphere-viewer/core/src/data/constants';
 import {
-    BackSide,
     BufferAttribute,
+    FrontSide,
     Frustum,
     ImageLoader,
     MathUtils,
@@ -98,6 +99,8 @@ const getConfig = utils.getConfigParser<EquirectangularTilesAdapterConfig>(
 const frustum = new Frustum();
 const projScreenMatrix = new Matrix4();
 const vertexPosition = new Vector3();
+const direction = new Vector3();
+const directionVector = new Vector3();
 
 /**
  * Adapter for tiled panoramas
@@ -240,7 +243,7 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
             this.SPHERE_HORIZONTAL_SEGMENTS,
             -Math.PI / 2
         )
-            .scale(1, 1, 1)
+            .scale(-1, 1, 1)
             .toNonIndexed() as SphereGeometry;
 
         geometry.clearGroups();
@@ -295,9 +298,9 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
     private __setTexture(mesh: EquirectangularMesh, texture: Texture) {
         let material;
         if (texture) {
-            material = new MeshBasicMaterial({ map: texture, side: BackSide });
+            material = new MeshBasicMaterial({ map: texture, side: FrontSide });
         } else {
-            material = new MeshBasicMaterial({ opacity: 0, side: BackSide, transparent: true });
+            material = new MeshBasicMaterial({ opacity: 0, side: FrontSide, transparent: true });
         }
 
         for (let i = 0; i < this.NB_GROUPS; i++) {
@@ -343,7 +346,8 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
 
         for (let i = 0; i < this.NB_VERTICES; i += 1) {
             vertexPosition.fromBufferAttribute(verticesPosition, i);
-            vertexPosition.applyEuler(this.viewer.renderer.sphereCorrection);
+            this.viewer.renderer.meshContainer.updateMatrixWorld();
+            vertexPosition.applyMatrix4(this.viewer.renderer.meshContainer.matrixWorld);
 
             if (frustum.containsPoint(vertexPosition)) {
                 // compute position of the segment (3 or 6 vertices)
@@ -367,7 +371,8 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
                     // compute the position of the tile
                     const row = Math.floor(segmentRow / config.facesByRow);
                     const col = Math.floor(segmentCol / config.facesByCol);
-                    let angle = vertexPosition.angleTo(this.viewer.state.direction);
+                    direction.addVectors(camera.position,camera.getWorldDirection(directionVector).multiplyScalar(SPHERE_RADIUS));
+                    let angle = vertexPosition.angleTo(direction);
                     if (row === 0 || row === config.rows - 1) {
                         angle *= 2; // lower priority to top and bottom tiles
                     }
@@ -434,7 +439,7 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
                         image = buildDebugTexture(image, tile.config.level, tileId(tile)) as any;
                     }
 
-                    const material = new MeshBasicMaterial({ map: utils.createTexture(image), side: BackSide });
+                    const material = new MeshBasicMaterial({ map: utils.createTexture(image), side: FrontSide });
                     this.__swapMaterial(tile, material, false);
                     this.viewer.needsUpdate();
                 }

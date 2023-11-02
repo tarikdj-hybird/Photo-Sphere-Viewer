@@ -7,6 +7,7 @@ import {
     BeforeRotateEvent,
     ConfigChangedEvent,
     PanoramaLoadedEvent,
+    PositionUpdatedEvent,
     ReadyEvent,
     SizeUpdatedEvent,
     StopAllEvent,
@@ -49,7 +50,7 @@ import {
     resolveBoolean,
     toggleClass,
 } from './utils';
-import { Group, MathUtils, PerspectiveCamera, Scene } from 'three';
+import { Group, MathUtils, PerspectiveCamera, Scene, Vector3 } from 'three';
 
 /**
  * Photo Sphere Viewer controller
@@ -62,6 +63,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
     readonly container: HTMLElement;
     readonly camera: PerspectiveCamera;
     readonly meshContainer: Group;
+    readonly potreeViewer: any;
     readonly scene: Scene;
 
     /** @internal */
@@ -94,6 +96,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
         // this.parent.appendChild(this.container);
         this.camera = config.camera;
         this.meshContainer = config.meshContainer;
+        this.potreeViewer = config.potreeViewer;
         this.scene = config.scene;
 
         // @ts-ignore
@@ -149,7 +152,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
         this.adapter.destroy();
         this.dynamics.destroy();
 
-        this.parent.removeChild(this.container);
+        // this.parent.removeChild(this.container);
         // @ts-ignore
         delete this.parent[VIEWER_DATA];
     }
@@ -209,7 +212,7 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
      * Returns the current position of the camera
      */
     getPosition(): Position {
-        return this.dataHelper.cleanPosition(this.dynamics.position.current);
+        return this.dataHelper.cleanPosition({ yaw: this.potreeViewer.scene.view.yaw,pitch: this.potreeViewer.scene.view.pitch });
     }
 
     /**
@@ -536,14 +539,16 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
             return;
         }
 
-        this.dynamics.position.setValue(e.position);
+        // this.dynamics.position.setValue(e.position);
+        this.dispatchEvent(new PositionUpdatedEvent(e.position));
     }
 
     /**
      * Zooms to a specific level between `maxFov` and `minFov`
      */
     zoom(level: number) {
-        this.dynamics.zoom.setValue(level);
+        // this.dynamics.zoom.setValue(level);
+        this.dispatchEvent(new ZoomUpdatedEvent(level));
     }
 
     /**
@@ -708,6 +713,14 @@ export class Viewer extends TypedEventTarget<ViewerEvents> {
         } else {
             this.exitFullscreen();
         }
+    }
+
+    /**
+     * Sets camera direction
+     * @param direction - new camera direction
+     */
+    setDirection(direction: Vector3): void{
+        this.state.direction = direction;
     }
 
     /**

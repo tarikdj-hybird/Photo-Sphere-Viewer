@@ -17,6 +17,7 @@ export const DEFAULTS: Required<ParsedViewerConfig> = {
     container: null,
     camera: null,
     meshContainer: null,
+    potreeViewer: null,
     scene: null,
     adapter: [EquirectangularAdapter as any, null],
     plugins: [],

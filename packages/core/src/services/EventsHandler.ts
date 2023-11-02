@@ -354,25 +354,13 @@ export class EventsHandler extends AbstractService {
             return;
         }
 
-        if (this.config.mousewheelCtrlKey && !this.data.ctrlKeyDown) {
-            this.viewer.overlay.show({
-                id: IDS.CTRL_ZOOM,
-                image: mousewheelIcon,
-                title: this.config.lang.ctrlZoom,
-            });
-
-            clearTimeout(this.data.ctrlZoomTimeout);
-            this.data.ctrlZoomTimeout = setTimeout(() => this.viewer.overlay.hide(IDS.CTRL_ZOOM), CTRLZOOM_TIMEOUT);
-
-            return;
-        }
-
         evt.preventDefault();
         evt.stopPropagation();
 
         const delta = (evt.deltaY / Math.abs(evt.deltaY)) * 5 * this.config.zoomSpeed;
         if (delta !== 0) {
             this.viewer.dynamics.zoom.step(-delta, 5);
+            this.viewer.zoom(this.viewer.dynamics.zoom.current)
         }
     }
 

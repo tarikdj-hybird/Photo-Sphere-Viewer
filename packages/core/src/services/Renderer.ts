@@ -38,8 +38,8 @@ export class Renderer extends AbstractService {
     private readonly scene: Scene;
     /** @internal */
     public readonly camera: PerspectiveCamera;
-    private readonly mesh: Mesh;
-    private readonly meshContainer: Group;
+    public readonly mesh: Mesh;
+    public readonly meshContainer: Group;
     private readonly raycaster: Raycaster;
     private readonly container: HTMLElement;
 
@@ -113,7 +113,7 @@ export class Renderer extends AbstractService {
         this.cleanScene(this.scene);
 
         // remove container
-        this.viewer.container.removeChild(this.container);
+        // this.viewer.container.removeChild(this.container);
 
         this.viewer.removeEventListener(SizeUpdatedEvent.type, this);
         this.viewer.removeEventListener(ZoomUpdatedEvent.type, this);
@@ -169,17 +169,17 @@ export class Renderer extends AbstractService {
         } else {
             this.customRenderer = null;
         }
-        this.viewer.needsUpdate();
+        // this.viewer.needsUpdate();
     }
 
     /**
      * Updates the size of the renderer and the aspect of the camera
      */
     private __onSizeUpdated() {
-        this.renderer.setSize(this.state.size.width, this.state.size.height);
+        // this.renderer.setSize(this.state.size.width, this.state.size.height);
         // this.camera.aspect = this.state.aspect;
         // this.camera.updateProjectionMatrix();
-        this.viewer.needsUpdate();
+        // this.viewer.needsUpdate();
     }
 
     /**
@@ -188,7 +188,7 @@ export class Renderer extends AbstractService {
     private __onZoomUpdated() {
         // this.camera.fov = this.state.vFov;
         // this.camera.updateProjectionMatrix();
-        this.viewer.needsUpdate();
+        // this.viewer.needsUpdate();
     }
 
     /**
@@ -203,7 +203,7 @@ export class Renderer extends AbstractService {
         //         .multiplyScalar(this.config.fisheye / 2)
         //         .negate();
         // }
-        this.viewer.needsUpdate();
+        // this.viewer.needsUpdate();
     }
 
     /**
@@ -214,7 +214,7 @@ export class Renderer extends AbstractService {
         this.timestamp = timestamp;
 
         this.viewer.dispatchEvent(new BeforeRenderEvent(timestamp, elapsed));
-        this.viewer.dynamics.update(elapsed);
+        // this.viewer.dynamics.update(elapsed);
 
         if (this.state.needsUpdate) {
             (this.customRenderer || this.renderer).render(this.scene, this.camera);
@@ -232,7 +232,7 @@ export class Renderer extends AbstractService {
 
         this.viewer.adapter.setTexture(this.mesh, textureData);
 
-        this.viewer.needsUpdate();
+        // this.viewer.needsUpdate();
     }
 
     /**
@@ -241,7 +241,7 @@ export class Renderer extends AbstractService {
      */
     setOverlay(textureData: TextureData, opacity: number) {
         this.viewer.adapter.setOverlay(this.mesh, textureData, opacity);
-        this.viewer.needsUpdate();
+        // this.viewer.needsUpdate();
     }
 
     /**

@@ -266,6 +266,7 @@ export type ViewerConfig = {
     container: HTMLElement | string;
     camera?: PerspectiveCamera;
     meshContainer?: Group;
+    potreeViewer?: any;
     scene?: Scene;
     panorama?: any;
     overlay?: any;
