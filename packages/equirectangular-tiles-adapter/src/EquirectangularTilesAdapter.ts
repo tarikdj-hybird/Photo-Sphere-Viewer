@@ -21,7 +21,7 @@ import {
     EquirectangularTilesAdapterConfig,
     EquirectangularTilesPanorama,
 } from './model';
-import { checkPanoramaConfig, getTileConfig, EquirectangularTileConfig, getTileConfigByIndex } from './utils';
+import { checkPanoramaConfig, getTileConfig, EquirectangularTileConfig, getTileConfigByIndex, isMultiTiles } from './utils';
 
 /* the faces of the top and bottom rows are made of a single triangle (3 vertices)
  * all other faces are made of two triangles (6 vertices)
@@ -243,7 +243,7 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
             this.SPHERE_HORIZONTAL_SEGMENTS,
             -Math.PI / 2
         )
-            .scale(-1, 1, 1)
+            .scale(-0.5, 0.5, 0.5)
             .toNonIndexed() as SphereGeometry;
 
         geometry.clearGroups();
@@ -366,8 +366,10 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
                 const segmentRow = Math.floor(segmentIndex / this.SPHERE_SEGMENTS);
                 const segmentCol = segmentIndex - segmentRow * this.SPHERE_SEGMENTS;
 
+                // Load current resolution tile
                 let config = tileConfig;
-                while (config) {
+                    const highResConfig = isMultiTiles(panorama) ? getTileConfigByIndex(panorama, panorama.levels.length - 1, this) : null;
+                    while (config) {
                     // compute the position of the tile
                     const row = Math.floor(segmentRow / config.facesByRow);
                     const col = Math.floor(segmentCol / config.facesByCol);
@@ -384,6 +386,7 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
                         config,
                         url: null,
                     };
+
                     const id = tileId(tile);
 
                     if (tilesToLoad[id]) {
@@ -393,7 +396,29 @@ export class EquirectangularTilesAdapter extends AbstractAdapter<
                         tile.url = panorama.tileUrl(col, row, config.level);
 
                         if (tile.url) {
-                            tilesToLoad[id] = tile;
+                            tilesToLoad[id] = tile; // current resolution tile
+
+                            // load high resolution tile in bg
+                            if(highResConfig && highResConfig.level !== config.level){
+                                const highResTile: EquirectangularTile = {
+                                    row,
+                                    col,
+                                    angle: angle * 2,
+                                    config: highResConfig,
+                                    url: null,
+                                };    
+                                const highResId = tileId(highResTile);
+                                if (tilesToLoad[highResId]) {
+                                    tilesToLoad[highResId].angle = Math.min(tilesToLoad[highResId].angle * 2, angle * 2);
+                                } else {
+                                    highResTile.url = panorama.tileUrl(col, row, highResConfig.level);
+    
+                                    if(highResTile.url){
+                                        tilesToLoad[highResId] = highResTile;
+                                    }
+                                }
+                            }
+
                             break;
                         } else {
                             // if no url is returned, try a lower tile level

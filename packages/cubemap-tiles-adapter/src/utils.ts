@@ -9,7 +9,7 @@ export type CubemapTileConfig = CubemapTileLevel & {
     facesByTile: number;
 };
 
-function isMultiTiles(
+export function isMultiTiles(
     panorama: CubemapTilesPanorama | CubemapMultiTilesPanorama
 ): panorama is CubemapMultiTilesPanorama {
     return !!(panorama as CubemapMultiTilesPanorama).levels;

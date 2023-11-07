@@ -11,7 +11,7 @@ export type EquirectangularTileConfig = EquirectangularTileLevel & {
     facesByRow: number;
 };
 
-function isMultiTiles(
+export function isMultiTiles(
     panorama: EquirectangularTilesPanorama | EquirectangularMultiTilesPanorama
 ): panorama is EquirectangularMultiTilesPanorama {
     return !!(panorama as EquirectangularMultiTilesPanorama).levels;
